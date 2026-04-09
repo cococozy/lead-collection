@@ -4,6 +4,8 @@ import { desc } from "drizzle-orm";
 import LeadsTable from "./_components/LeadsTable";
 import SignOutButton from "./_components/SignOutButton";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   const allLeads = await db.select().from(leads).orderBy(desc(leads.createdAt));
 
