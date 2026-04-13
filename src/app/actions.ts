@@ -24,11 +24,12 @@ export async function submitLead(
     await db.insert(leads).values({ name, phone, email });
     return { success: true };
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : "";
+    console.error("[submitLead error]", e);
+    const msg = e instanceof Error ? e.message : String(e);
     if (msg.includes("UNIQUE")) {
       return { success: false, error: "이미 등록된 이메일입니다." };
     }
-    return { success: false, error: "저장 중 오류가 발생했습니다. 다시 시도해주세요." };
+    return { success: false, error: `오류: ${msg}` };
   }
 }
 
@@ -41,11 +42,12 @@ export async function updateLead(
     revalidatePath("/admin");
     return { success: true };
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : "";
+    console.error("[updateLead error]", e);
+    const msg = e instanceof Error ? e.message : String(e);
     if (msg.includes("UNIQUE")) {
       return { success: false, error: "이미 등록된 이메일입니다." };
     }
-    return { success: false, error: "수정 중 오류가 발생했습니다." };
+    return { success: false, error: `오류: ${msg}` };
   }
 }
 
@@ -54,7 +56,8 @@ export async function deleteLead(id: number): Promise<ActionResult> {
     await db.delete(leads).where(eq(leads.id, id));
     revalidatePath("/admin");
     return { success: true };
-  } catch {
+  } catch (e: unknown) {
+    console.error("[deleteLead error]", e);
     return { success: false, error: "삭제 중 오류가 발생했습니다." };
   }
 }
