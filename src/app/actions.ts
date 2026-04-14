@@ -2,8 +2,6 @@
 
 import { db } from "@/db";
 import { leads } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 
 export type ActionResult =
   | { success: true }
@@ -30,34 +28,5 @@ export async function submitLead(
       return { success: false, error: "이미 등록된 이메일입니다." };
     }
     return { success: false, error: `오류: ${msg}` };
-  }
-}
-
-export async function updateLead(
-  id: number,
-  data: { name: string; phone: string; email: string }
-): Promise<ActionResult> {
-  try {
-    await db.update(leads).set(data).where(eq(leads.id, id));
-    revalidatePath("/admin");
-    return { success: true };
-  } catch (e: unknown) {
-    console.error("[updateLead error]", e);
-    const msg = e instanceof Error ? e.message : String(e);
-    if (msg.includes("UNIQUE")) {
-      return { success: false, error: "이미 등록된 이메일입니다." };
-    }
-    return { success: false, error: `오류: ${msg}` };
-  }
-}
-
-export async function deleteLead(id: number): Promise<ActionResult> {
-  try {
-    await db.delete(leads).where(eq(leads.id, id));
-    revalidatePath("/admin");
-    return { success: true };
-  } catch (e: unknown) {
-    console.error("[deleteLead error]", e);
-    return { success: false, error: "삭제 중 오류가 발생했습니다." };
   }
 }

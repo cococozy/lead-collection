@@ -1,0 +1,2 @@
+cd lead-collection
+npx vercel logs --prod
