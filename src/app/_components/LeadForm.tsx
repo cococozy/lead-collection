@@ -1,14 +1,33 @@
 "use client";
 
 import { useActionState, useRef } from "react";
+import { usePostHog } from "posthog-js/react";
 import { submitLead, type ActionResult } from "@/app/actions";
 
 const initialState: ActionResult | null = null;
 
 export default function LeadForm() {
+  const posthog = usePostHog();
   const [result, action, isPending] = useActionState(
     async (_prev: ActionResult | null, formData: FormData) => {
-      return submitLead(formData);
+      const name = formData.get("name") as string;
+      const phone = formData.get("phone") as string;
+      const email = formData.get("email") as string;
+
+      console.log("[LeadForm] 폼 제출 시작", { name, phone, email });
+
+      const res = await submitLead(formData);
+
+      console.log("[LeadForm] 서버 액션 결과", res);
+
+      if (res.success) {
+        console.log("[LeadForm] PostHog capture: lead_submitted");
+        posthog.capture("lead_submitted", { name, phone, email });
+      } else {
+        console.log("[LeadForm] PostHog capture: lead_submit_failed", res.error);
+        posthog.capture("lead_submit_failed", { name, phone, email, error: res.error });
+      }
+      return res;
     },
     initialState
   );
