@@ -19,7 +19,8 @@ type Lead = {
   notes: Note[];
 };
 
-export default function LeadsTable({ leads }: { leads: Lead[] }) {
+export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
+  const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [notesTarget, setNotesTarget] = useState<Lead | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -28,6 +29,13 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
     startTransition(async () => {
       await deleteLead(lead.id);
     });
+  }
+
+  function handleNotesChange(leadId: number, notes: Note[]) {
+    setLeads((prev) =>
+      prev.map((l) => (l.id === leadId ? { ...l, notes } : l))
+    );
+    setNotesTarget((prev) => (prev?.id === leadId ? { ...prev, notes } : prev));
   }
 
   if (leads.length === 0) {
@@ -114,6 +122,7 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
           lead={notesTarget}
           notes={notesTarget.notes}
           onClose={() => setNotesTarget(null)}
+          onNotesChange={(notes) => handleNotesChange(notesTarget.id, notes)}
         />
       )}
     </>

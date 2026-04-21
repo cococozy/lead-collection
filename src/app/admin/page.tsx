@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { leadNotes, leads } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import LeadsTable from "./_components/LeadsTable";
 import SignOutButton from "./_components/SignOutButton";
 

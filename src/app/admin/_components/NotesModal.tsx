@@ -18,13 +18,20 @@ export default function NotesModal({
   lead,
   notes: initialNotes,
   onClose,
+  onNotesChange,
 }: {
   lead: Lead;
   notes: Note[];
   onClose: () => void;
+  onNotesChange: (notes: Note[]) => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [notes, setNotes] = useState<Note[]>(initialNotes);
+
+  function updateNotes(next: Note[]) {
+    setNotes(next);
+    onNotesChange(next);
+  }
   const [content, setContent] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -39,7 +46,7 @@ export default function NotesModal({
     startTransition(async () => {
       const result: AddNoteResult = await addNote(lead.id, content);
       if (result.success) {
-        setNotes((prev) => [result.note, ...prev]);
+        updateNotes([result.note, ...notes]);
         setContent("");
       } else {
         setError(result.error);
@@ -51,7 +58,9 @@ export default function NotesModal({
     startTransition(async () => {
       const result = await deleteNote(noteId);
       if (result.success) {
-        setNotes((prev) => prev.filter((n) => n.id !== noteId));
+        updateNotes(notes.filter((n) => n.id !== noteId));
+      } else {
+        setError(result.error);
       }
     });
   }

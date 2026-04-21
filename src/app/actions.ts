@@ -1,9 +1,15 @@
 "use server";
 
+import { auth } from "@/auth";
 import { db } from "@/db";
 import { leadNotes, leads } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+
+async function requireAdmin(): Promise<boolean> {
+  const session = await auth();
+  return !!session;
+}
 
 export type ActionResult =
   | { success: true }
@@ -53,6 +59,7 @@ export async function updateLead(
   id: number,
   data: { name: string; phone: string; email: string }
 ): Promise<ActionResult> {
+  if (!await requireAdmin()) return { success: false, error: "인증이 필요합니다." };
   try {
     await db.update(leads).set(data).where(eq(leads.id, id));
     revalidatePath("/admin");
@@ -67,6 +74,7 @@ export async function updateLead(
 }
 
 export async function deleteLead(id: number): Promise<ActionResult> {
+  if (!await requireAdmin()) return { success: false, error: "인증이 필요합니다." };
   try {
     await db.delete(leads).where(eq(leads.id, id));
     revalidatePath("/admin");
@@ -84,6 +92,7 @@ export async function addNote(
   leadId: number,
   content: string
 ): Promise<AddNoteResult> {
+  if (!await requireAdmin()) return { success: false, error: "인증이 필요합니다." };
   if (!content.trim()) {
     return { success: false, error: "메모 내용을 입력해주세요." };
   }
@@ -100,6 +109,7 @@ export async function addNote(
 }
 
 export async function deleteNote(id: number): Promise<ActionResult> {
+  if (!await requireAdmin()) return { success: false, error: "인증이 필요합니다." };
   try {
     await db.delete(leadNotes).where(eq(leadNotes.id, id));
     revalidatePath("/admin");
