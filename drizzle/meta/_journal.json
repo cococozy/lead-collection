@@ -8,6 +8,13 @@
       "when": 1775734717780,
       "tag": "0000_redundant_namor",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776770875415,
+      "tag": "0001_dapper_grandmaster",
+      "breakpoints": true
     }
   ]
 }
